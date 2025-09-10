@@ -7,9 +7,11 @@ This is the composable FinOps dashboard.
 ## How to install
 
 ```sh
-$ helm repo add krateo https://charts.krateo.io
-$ helm repo update krateo
-$ helm install finops-dashboard krateo/finops-dashboard -n krateo-system
+helm install <name> portal-finops-dashboard \
+  --repo https://marketplace.krateo.io \
+  --namespace <krateo-namespace> \
+  --version 0.0.1 \
+  --wait
 ```
 
 # Resource Tree
