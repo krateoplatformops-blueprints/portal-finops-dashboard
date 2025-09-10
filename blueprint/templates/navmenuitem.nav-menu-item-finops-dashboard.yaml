@@ -1,0 +1,22 @@
+kind: NavMenuItem
+apiVersion: widgets.templates.krateo.io/v1beta1
+metadata:
+  name: nav-menu-item-dashboard-finops
+  namespace: {{ .Release.Namespace }}
+spec:
+  widgetData:
+    allowedResources:
+    - pages
+    resourceRefId: finops-dashboard-page
+    label: FinOps
+    icon: fa-hand-holding-dollar
+    path: /finops
+    order: 90 # Always the last object of the menu
+  resourcesRefs:
+    items:
+    - id: finops-dashboard-page
+      apiVersion: widgets.templates.krateo.io/v1beta1
+      name: finops-dashboard-page
+      namespace: {{ .Release.Namespace }}
+      resource: pages
+      verb: GET

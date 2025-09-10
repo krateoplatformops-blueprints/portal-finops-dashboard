@@ -1,0 +1,29 @@
+apiVersion: widgets.templates.krateo.io/v1beta1
+kind: Table
+metadata:
+  name: finops-dashboard-compositions-panel-table
+  namespace: {{ .Release.Namespace }}
+spec:
+  apiRef:
+    name: finops-dashboard-compositions-panel-table
+    namespace: krateo-system
+  widgetData:
+    allowedResources: {}
+    columns:
+    - title: Name
+      valueKey: name
+    - title: Namespace
+      valueKey: namespace
+    - title: Optimization
+      valueKey: opt
+    - title: Warning
+      valueKey: warning
+      kind: icon
+      color: red
+    - title: Cost
+      valueKey: cost
+    data: []
+    pageSize: 10
+  widgetDataTemplate:
+  - expression: ${ .allCosts }
+    forPath: data

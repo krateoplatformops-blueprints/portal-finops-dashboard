@@ -1,0 +1,35 @@
+apiVersion: templates.krateo.io/v1
+kind: RESTAction
+metadata:
+  name: finops-dashboard-summary-panel-row-1-piechart
+spec:
+  api:
+  - name: costs
+    endpointRef: 
+      name: finops-database-handler-endpoint
+      namespace: {{ .Release.Namespace }}
+    path: "/compute/costs"
+    verb: POST
+    payload: |
+      ${ {table_name: "{{ .Values.tableName }}", composition_id: "%" } }
+    headers:
+    - 'Accept: application/json'
+    - 'Content-Type: application/json'
+---
+apiVersion: templates.krateo.io/v1
+kind: RESTAction
+metadata:
+  name: finops-dashboard-summary-panel-row-1-linechart
+spec:
+  api:
+  - name: costsbreakdown
+    endpointRef: 
+      name: finops-database-handler-endpoint
+      namespace: {{ .Release.Namespace }}
+    path: "/compute/costsbreakdown"
+    verb: POST
+    payload: |
+      ${ {table_name: "{{ .Values.tableName }}", composition_id: "%" } }
+    headers:
+    - 'Accept: application/json'
+    - 'Content-Type: application/json'

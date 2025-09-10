@@ -1,0 +1,28 @@
+kind: Row
+apiVersion: widgets.templates.krateo.io/v1beta1
+metadata:
+  name: finops-dashboard-summary-panel-row-1
+spec:
+  widgetData:
+    allowedResources:
+    - piecharts
+    - linecharts
+    items:
+      - resourceRefId: cost-piechart
+        size: 6
+      - resourceRefId: cost-linechart
+        size: 18
+  resourcesRefs:
+    items:
+    - id:  cost-piechart
+      apiVersion: widgets.templates.krateo.io/v1beta1
+      name: finops-dashboard-summary-panel-row-1-piechart
+      namespace: {{ .Release.Namespace }}
+      resource: piecharts
+      verb: GET
+    - id: cost-linechart
+      apiVersion: widgets.templates.krateo.io/v1beta1
+      name: finops-dashboard-summary-panel-row-1-linechart
+      namespace: {{ .Release.Namespace }}
+      resource: linecharts
+      verb: GET

@@ -1,0 +1,7 @@
+kind: Paragraph
+apiVersion: widgets.templates.krateo.io/v1beta1
+metadata:
+  name: finops-dashboard-summary-panel-row-2-paragraph
+spec:
+  widgetData:
+    text: "The overall total cost and cumulative cost over time."

@@ -1,0 +1,104 @@
+apiVersion: templates.krateo.io/v1
+kind: RESTAction
+metadata:
+  name: finops-dashboard-compositions-panel-table
+  namespace: {{ .Release.Namespace }}
+spec:
+  api:
+  - name: allNamespacesAndCrds
+    path: "/call?apiVersion=templates.krateo.io%2Fv1&resource=restactions&name=finops-compositions-get-ns-and-crd&namespace={{ .Release.Namespace }}"
+    verb: GET
+    endpointRef:
+      name: snowplow-endpoint
+      namespace: {{ .Release.Namespace }}
+    headers:
+    - 'Accept: application/json'
+    continueOnError: true
+    errorKey: allNamespacesAndCrdsError
+    exportJwt: true
+  - name: allCompositions
+    dependsOn: 
+      name: allNamespacesAndCrds
+      iterator: ".allNamespacesAndCrds.status"
+    path: ${ "/apis/composition.krateo.io/" + (.version) + "/namespaces/" + (.namespace) + "/" + (.plural) }
+    verb: GET 
+    continueOnError: true
+    errorKey: allCompositionsError
+    filter: .allCompositions.items
+  - name: allCosts
+    dependsOn: 
+      name: allCompositions
+      iterator: .allCompositions
+    endpointRef:
+      name: finops-database-handler-endpoint
+      namespace: {{ .Release.Namespace }}
+    path: "/compute/allcosts"
+    verb: POST
+    headers:
+    - 'Accept: application/json'
+    - 'Content-Type: application/json'
+    payload: |
+      ${ {composition_id: .metadata.uid, table_name: "{{ .Values.tableName }}", name: .metadata.name, namespace: .metadata.namespace, opt: ( 
+                if .spec.optimization? then
+                 ( try (.spec.optimization | fromjson | .[] | .optimization.resourceDelta | tostring) catch "Not available" )
+                else
+                 "Not available"
+                end
+              ) } }
+    filter: >
+      {
+      cost: .allCosts.billed_cost,
+      key: .allCosts.composition_id,
+      opt: .allCosts.opt,
+      name: .allCosts.name,
+      namespace: .allCosts.namespace,
+      warning: (if (.allCosts.opt | tonumber? // 0) < -80 then ("fa-solid fa-triangle-exclamation") else ("") end )
+      }
+  filter: >
+    {
+      allCosts:
+        ( if (.allCosts | type) == "array" then
+            .allCosts
+            | map(
+                [
+                  # cost (decimal if numeric, else string)
+                  (
+                    { valueKey: "cost", kind: "jsonSchemaType",
+                      type: ( if (.cost | tonumber? != null) then "decimal" else "string" end )
+                    }
+                    + ( if (.cost | tonumber? != null)
+                        then { decimalValue: (.cost | tostring) }
+                        else { stringValue: (.cost | tostring) }
+                      end )
+                  ),
+                  # key
+                  { valueKey: "key", kind: "jsonSchemaType", type: "string", stringValue: (.key | tostring) },
+                  # opt (decimal if numeric, else string)
+                  (
+                    { valueKey: "opt", kind: "jsonSchemaType",
+                      type: ( if (.opt | tonumber? != null) then "decimal" else "string" end )
+                    }
+                    + ( if (.opt | tonumber? != null)
+                        then { decimalValue: (.opt | tostring) }
+                        else { stringValue: (.opt | tostring) }
+                      end )
+                  ),
+                  # name
+                  { valueKey: "name", kind: "jsonSchemaType", type: "string", stringValue: (.name | tostring) },
+                  # namespace
+                  { valueKey: "namespace", kind: "jsonSchemaType", type: "string", stringValue: (.namespace | tostring) },
+                  # warning -> icon if present, otherwise empty string cell
+                  ( if (.warning // "") == "" then
+                      { valueKey: "warning", kind: "jsonSchemaType", type: "string", stringValue: "" }
+                    else
+                      { valueKey: "warning", kind: "icon", stringValue: .warning }
+                    end
+                  )
+                ]
+              )
+          elif (.allCosts | type) == "object" then
+            []
+          else
+            []
+          end )
+    }

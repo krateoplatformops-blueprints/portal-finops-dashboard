@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "properties": {
+    "tableName": {
+      "default": "finops",
+      "title": "tableName",
+      "type": "string"
+    }
+  },
+  "required": [
+    "tableName"
+  ],
+  "type": "object"
+}
