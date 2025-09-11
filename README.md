@@ -10,7 +10,7 @@ This is the composable FinOps dashboard.
 helm install <name> portal-finops-dashboard \
   --repo https://marketplace.krateo.io \
   --namespace <krateo-namespace> \
-  --version 0.0.1 \
+  --version 1.0.0 \
   --wait
 ```
 
